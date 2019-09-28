@@ -1,5 +1,7 @@
 ---
-title: "team"
+title: "Lab 3"
+author: "Alex Thompson and Devin Erb"
+date: "9/28/2019"
 output: html_document
 ---
 
@@ -7,24 +9,99 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
+**set up**
+```{r message=FALSE, warning=FALSE}
+library(ggplot2)
+```
+
+
 ## Background
 Loading in the data
  
-```{r}
+```{r message=FALSE, warning=FALSE}
 happy = readRDS("HAPPY.rds")
 ```
 
 COnverting all the n ame to lowercase
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 names(happy) = tolower(names(happy))
 ```
 
-## Part one (cleaning)
+## Cleaning
 
-**Data cleaning: the values “IAP”, “DK” and “NA” all encode missing values. Replace all of these instances by the value NA.**
-
-```{r}
+```{r message=FALSE, warning=FALSE}
 happy[happy == 'IAP'] = "NA"
 happy[happy == 'DK'] = "NA"
 ```
+
+This removes iap and dk and replaces them with NA
+
+```{r message=FALSE, warning=FALSE} 
+happy$age[happy$age=="89 OR OLDER"] = "89"
+happy$age = as.numeric(happy$age)
+```
+
+This changes the factor to numeric and replaces 89 and older with 89
+
+```{r message=FALSE, warning=FALSE}
+happy$happy = factor(happy$happy, levels = c("NOT TOO HAPPY", "PRETTY HAPPY", "VERY HAPPY"))
+
+happy$marital = factor(happy$marital, levels = c("NOT MARRIERD", "MARRIED", "SEPARATED", "DIVORCED", "WIDOWED"))
+
+happy$sex = factor(happy$sex, levels = c("FEMALE", "MALE"))
+
+happy$degree = factor(happy$degree, levels = c("LT HIGHSCHOOL", "HIGH SCHOOL", "JUNIOR COLLEGE", "BACHELOR", "GRADUATE"))
+
+happy$finrela = factor(happy$finrela, levels = c("FAR BELOW AVERAGE", "BELOW AVERAGE", "ABOVE AVERAGE", "FAR ABOVE AVERAGE"))
+
+happy$health = factor(happy$health, levels = c("POOR", "FAIR", "GOOD", "EXCELLENT"))
+
+happy$partyid = factor(happy$partyid, levels = c("STRONG DEMOCRAT", "NOT STR DEMOCRAT", "IND,NEAR DEM", "INDEPENDENT", "IND,NEAR REP", "NOT STR REPUBLICAN", "STRONG REPUBLICAN"))
+```
+
+This applies correct levels to all the catagorical factors
+
+## Exploration
+
+For the first distribution we take a look at age! Exciting!
+
+```{r message=FALSE, warning=FALSE}
+ggplot(happy, aes(x=age)) + geom_density(data = subset(happy, marital == "MARRIED"), aes(fill = "Married"), alpha = .5) + geom_density(data = subset(happy, marital != "MARRIED"), aes(fill = "Not Married"), alpha = .5) + labs(x= "Age", y = "Density", fill = "Color legend", title = "Age Distribution for Married People vs. Married people")
+```
+
+For the second distribution we looked at degrees! Very fun!
+
+```{r message=FALSE, warning=FALSE}
+ggplot(happy, aes(x=degree, fill = degree)) + geom_bar(data = subset(happy, degree != "NA")) + labs(x = "Achieved degree", y = "Amount", fill = "Color legend", title = "Distribution of degrees")
+```
+
+Now lets look at happiness vs. some other factors
+
+```{r message=FALSE, warning=FALSE}
+ggplot(happy, aes(y=age, x=happy, fill=happy)) + geom_boxplot(data = subset(happy, happy != "NA")) + labs(x="Level of Happiness", y="Age", fill="Color Legend", title="Distribution of ages at each level of Happiness")
+```
+
+THis plot shows that levels of happiness have about the same age distribution.
+
+```{r message=FALSE, warning=FALSE}
+ggplot(data = subset(happy, happy != "NA" & partyid != "NA"), aes(x=happy, y= partyid)) + geom_bin2d() + labs(x="Levels of Happiness", y = "Party Id", count= "Amount", title = "Density for Party ID vs. Happiness Level")
+```
+
+This plot shows the bin density for the cross of party ID and levels of happiness.
+
+```{r message=FALSE, warning=FALSE}
+ggplot(happy, aes(x=happy, fill = happy)) + geom_bar(data = subset(happy, happy != "NA" & marital != "NA")) + facet_grid(~sex, drop = TRUE) + labs(x= "Levels of Happiness", y = "Amount", fill = "Color legend", title = "Amount of people at levels of happiness seperated by gender") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+This plot shows that gender seems to have no difference in distribution of happiness. 
+
+## Conclusions
+
+Some conclusion we have made, first, there seems to be a large amount of young married people, and a uniform amount of non married people by age. Second, there seems to be a lot of people with lower degreees, like just high school degree. Third, there does not seem to be a big difference in distribution of age for the levels of happiness. Fourth, there is a large density of not overally strong democrats that are pretty happy in comparison to other political identities, and the rest seems to be uniform over political identities. Finally, there is not a very big difference in the shape of the distribution of levels of happiness between the genders. All in all, it seems like there is not learge correlation between happiness and other variables in the data.
+
+
+
+
